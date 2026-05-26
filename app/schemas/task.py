@@ -5,7 +5,6 @@ class TaskSchema(BaseModel):
     title: str
     completed: bool = False
     createdAt: int
-    listId: str
 
 class TaskCreateSchema(BaseModel):
     title: str
