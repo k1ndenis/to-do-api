@@ -11,7 +11,7 @@ router = APIRouter()
 def read_lists(db: Session = Depends(get_db)) -> list[ListSchema]:
     return ListService.get_all_lists(db)
 
-@router.post("/lists")
+@router.post("/lists", status_code=status.HTTP_201_CREATED)
 def create_list(payload: ListCreateSchema, db: Session = Depends(get_db)) -> ListSchema:
     return ListService.create_list(db, payload)
 

@@ -6,7 +6,7 @@ from app.dependency import get_db
 
 router = APIRouter()
 
-@router.post("/lists/{list_id}/tasks")
+@router.post("/lists/{list_id}/tasks", status_code=status.HTTP_201_CREATED)
 def create_task(list_id: str, payload: TaskCreateSchema, db: Session = Depends(get_db)) -> TaskSchema:
     return TaskService.create_task(db, list_id, payload)
 

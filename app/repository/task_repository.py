@@ -27,7 +27,8 @@ class TaskRepository:
             id=new_task_orm.id,
             title=new_task_orm.title,
             completed=new_task_orm.completed,
-            createdAt=new_task_orm.createdAt
+            createdAt=new_task_orm.createdAt,
+            listId=new_task_orm.listId
         )
 
     @staticmethod
@@ -64,5 +65,6 @@ class TaskRepository:
             id=task.id,
             title=task.title,
             completed=task.completed,
-            createdAt=task.createdAt
+            createdAt=task.createdAt,
+            listId=task.listId
         )
