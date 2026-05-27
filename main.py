@@ -1,11 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1 import lists, tasks
 
-app = FastAPI(title="To-Do API",
+from app.api.v1 import lists, tasks
+from app.core.database import lifespan
+
+app = FastAPI(
+    title="To-Do API",
     description="API для управления to-do списками",
     version="1.0.0",
-    contact={"name": "Denis", "email": "k1ndenis.dev@gmail.com"})
+    contact={"name": "Denis", "email": "k1ndenis.dev@gmail.com"},
+    lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
