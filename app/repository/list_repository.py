@@ -8,9 +8,19 @@ from app.models.task import TaskSchema
 from app.core.database import ListORM, TaskORM
 
 class ListRepository:
-    @staticmethod
-    def get_all_lists(db: Session) -> list[ListSchema]:
-        lists_orm = db.scalars(select(ListORM)).all()
+    def __init__(self,
+        db: Session,
+        cache_redis_url: str,
+        cache_ttl_seconds: int,
+        cache_lists_key: str
+    ) -> None:
+        self.db = db
+        self.cache_redis_url = cache_redis_url
+        self.cache_ttl_seconds = cache_ttl_seconds
+        self.cache_lists_key = cache_lists_key
+
+    def get_all_lists(self) -> list[ListSchema]:
+        lists_orm = self.db.scalars(select(ListORM)).all()
         return [
             ListSchema(
                 id=list_orm.id,
@@ -28,7 +38,6 @@ class ListRepository:
             ) for list_orm in lists_orm
         ]
 
-    @staticmethod
     def create_list(db: Session, title: str) -> ListSchema:
         new_list_orm = ListORM(
             id=str(uuid4()),
@@ -46,7 +55,6 @@ class ListRepository:
             createdAt=new_list_orm.createdAt
         )
 
-    @staticmethod
     def delete_list(db: Session, list_id: str) -> bool:
         list_orm = db.get(ListORM, list_id)
         if not list_orm:
