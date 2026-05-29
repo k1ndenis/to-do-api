@@ -14,12 +14,7 @@ class ListService:
         cache_key: str
     ) -> None:
         self.db = db
-        self.repository = ListRepository(
-            db=db,
-            cache_redis_url=cache_redis_url,
-            cache_ttl_seconds=cache_ttl_seconds,
-            cache_lists_key=cache_key
-        )
+        self.repository = ListRepository(db)
         self.cache = RedisCacheBackend(cache_redis_url, cache_ttl_seconds)
         self.cache_key = cache_key
 
@@ -35,8 +30,10 @@ class ListService:
 
         return lists
 
-    def create_list(db: Session, payload: ListCreateSchema) -> ListSchema:
-        return ListRepository.create_list(db, title=payload.title)
+    def create_list(self, payload: ListCreateSchema) -> ListSchema:
+        self.cache.delete(self.cache_key)
+        return self.repository.create_list(title=payload.title)
 
-    def delete_list(db: Session, list_id: str) -> bool:
-        return ListRepository.delete_list(db, list_id)
+    def delete_list(self, list_id: str) -> bool:
+        self.cache.delete(self.cache_key)
+        return self.repository.delete_list(list_id)

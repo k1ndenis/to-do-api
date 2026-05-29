@@ -8,16 +8,8 @@ from app.models.task import TaskSchema
 from app.core.database import ListORM, TaskORM
 
 class ListRepository:
-    def __init__(self,
-        db: Session,
-        cache_redis_url: str,
-        cache_ttl_seconds: int,
-        cache_lists_key: str
-    ) -> None:
+    def __init__(self, db: Session) -> None:
         self.db = db
-        self.cache_redis_url = cache_redis_url
-        self.cache_ttl_seconds = cache_ttl_seconds
-        self.cache_lists_key = cache_lists_key
 
     def get_all_lists(self) -> list[ListSchema]:
         lists_orm = self.db.scalars(select(ListORM)).all()
@@ -38,16 +30,16 @@ class ListRepository:
             ) for list_orm in lists_orm
         ]
 
-    def create_list(db: Session, title: str) -> ListSchema:
+    def create_list(self, title: str) -> ListSchema:
         new_list_orm = ListORM(
             id=str(uuid4()),
             title=title,
             tasks=[],
             createdAt=int(time.time())
         )
-        db.add(new_list_orm)
-        db.commit()
-        db.refresh(new_list_orm)
+        self.db.add(new_list_orm)
+        self.db.commit()
+        self.db.refresh(new_list_orm)
         return ListSchema(
             id=new_list_orm.id,
             title=new_list_orm.title,
@@ -55,10 +47,10 @@ class ListRepository:
             createdAt=new_list_orm.createdAt
         )
 
-    def delete_list(db: Session, list_id: str) -> bool:
-        list_orm = db.get(ListORM, list_id)
+    def delete_list(self, list_id: str) -> bool:
+        list_orm = self.db.get(ListORM, list_id)
         if not list_orm:
             return False
-        db.delete(list_orm)
-        db.commit()
+        self.db.delete(list_orm)
+        self.db.commit()
         return True

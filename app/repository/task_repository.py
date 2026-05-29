@@ -7,9 +7,11 @@ from sqlalchemy.orm import Session
 from app.core.database import ListORM, TaskORM
 
 class TaskRepository:
-    @staticmethod
-    def create_task(db: Session, list_id: str, title: str) -> TaskSchema:
-        list_orm = db.get(ListORM, list_id)
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    def create_task(self, list_id: str, title: str) -> TaskSchema:
+        list_orm = self.db.get(ListORM, list_id)
         if not list_orm:
             raise ValueError(f"List with id {list_id} not found")
 
@@ -20,9 +22,9 @@ class TaskRepository:
             createdAt=int(time.time()),
             listId=list_id
         )
-        db.add(new_task_orm)
-        db.commit()
-        db.refresh(new_task_orm)
+        self.db.add(new_task_orm)
+        self.db.commit()
+        self.db.refresh(new_task_orm)
         return TaskSchema(
             id=new_task_orm.id,
             title=new_task_orm.title,
@@ -31,9 +33,8 @@ class TaskRepository:
             listId=new_task_orm.listId
         )
 
-    @staticmethod
-    def delete_task(db: Session, list_id: str, task_id: str) -> bool:
-        task = db.execute(
+    def delete_task(self, list_id: str, task_id: str) -> bool:
+        task = self.db.execute(
             select(TaskORM).where(
                 TaskORM.id == task_id,
                 TaskORM.listId == list_id
@@ -42,13 +43,12 @@ class TaskRepository:
 
         if not task:
             return False
-        db.delete(task)
-        db.commit()
+        self.db.delete(task)
+        self.db.commit()
         return True
 
-    @staticmethod
-    def toggle_task_completion(db: Session, list_id: str, task_id: str) -> TaskSchema:
-        task = db.execute(
+    def toggle_task_completion(self, list_id: str, task_id: str) -> TaskSchema:
+        task = self.db.execute(
             select(TaskORM).where(
                 TaskORM.id == task_id,
                 TaskORM.listId == list_id
@@ -59,8 +59,8 @@ class TaskRepository:
             raise ValueError(f"Task with id {task_id} not found in list {list_id}")
 
         task.completed = not task.completed
-        db.commit()
-        db.refresh(task)
+        self.db.commit()
+        self.db.refresh(task)
         return TaskSchema(
             id=task.id,
             title=task.title,

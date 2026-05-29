@@ -8,23 +8,24 @@ from app.repository.task_repository import TaskRepository
 from app.models.task import TaskCreateSchema, TaskSchema
 
 class TaskService:
-    @staticmethod
-    def create_task(db: Session, list_id: str, payload: TaskCreateSchema) -> TaskSchema:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+        self.repository = TaskRepository(db=db)
+
+    def create_task(self, list_id: str, payload: TaskCreateSchema) -> TaskSchema:
         try:
-            return TaskRepository.create_task(db, list_id, payload.title)
+            return self.repository.create_task(list_id, payload.title)
         except ValueError as e:
             raise HTTPException(status_code=404, detail=str(e))
 
-    @staticmethod
-    def delete_task(db: Session, list_id: str, task_id: str) -> bool:
+    def delete_task(self, list_id: str, task_id: str) -> bool:
         try:
-            return TaskRepository.delete_task(db, list_id, task_id)
+            return self.repository.delete_task(list_id, task_id)
         except ValueError as e:
             raise HTTPException(status_code=404, detail=str(e))
 
-    @staticmethod
-    def toggle_task_completion(db: Session, list_id: str, task_id: str) -> TaskSchema:
+    def toggle_task_completion(self, list_id: str, task_id: str) -> TaskSchema:
         try:
-            return TaskRepository.toggle_task_completion(db, list_id, task_id)
+            return self.repository.toggle_task_completion(list_id, task_id)
         except ValueError as e:
             raise HTTPException(status_code=404, detail=str(e))
