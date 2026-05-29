@@ -1,6 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from typing import Generator
+import os
 
 from app.core.database import SessionLocal
 from app.service.list_service import ListService
@@ -14,9 +15,10 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 def get_list_service(db: Session = Depends(get_db)) -> ListService:
+    redis_url = os.getenv("REDIS_URL")
     return ListService(
         db=db,
-        cache_redis_url="redis://localhost:6379",
+        cache_redis_url=redis_url,
         cache_ttl_seconds=60,
         cache_key="all_lists"
     )
